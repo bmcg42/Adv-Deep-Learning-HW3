@@ -43,14 +43,7 @@ class BaseLLM:
         - decode the outputs with self.tokenizer.decode
 
         """
-        tokens = self.tokenizer(prompt, return_tensors="pt")
-        tokens = tokens.to(self.model.device)
-        N = tokens["input_ids"].shape[1]
-        output = self.model.generate(
-            tokens["input_ids"],
-            attention_mask = tokens['attention_mask']
-        )
-        return self.tokenizer.decode(output[0, N:])
+        return self.batched_generate([prompt])[0]
 
     @overload
     def batched_generate(
