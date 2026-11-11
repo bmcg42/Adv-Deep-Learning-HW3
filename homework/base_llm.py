@@ -46,7 +46,10 @@ class BaseLLM:
         tokens = self.tokenizer(prompt, return_tensors="pt")
         tokens = tokens.to(self.model.device)
         N = tokens["input_ids"].shape[1]
-        output = self.model.generate(tokens["input_ids"])
+        output = self.model.generate(
+            tokens["input_ids"],
+            attention_mask = tokens['attention_mask']
+        )
         return self.tokenizer.decode(output[0, N:])
 
     @overload
@@ -117,13 +120,18 @@ class BaseLLM:
             padding=True
         )
         tokens = tokens.to(self.model.device)
+        generation_args = {
+            "max_new_tokens": 50,
+            "do_sample": temperature > 0,
+            "eos_token_id": self.tokenizer.eos_token_id,
+        }
+
+        if temperature > 0:
+            generation_args["temperature"] = temperature
         outputs = self.model.generate(
             tokens["input_ids"],
             attention_mask = tokens['attention_mask'],
-            max_new_tokens = 50,
-            do_sample = True if temperature > 0 else False,
-            temperature = temperature,
-            eos_token_id = self.tokenizer.eos_token_id
+            **generation_args
         )
         decoded = self.tokenizer.batch_decode(outputs[:, len(tokens["input_ids"][0]) :])
         # logic for parsing sequences here
