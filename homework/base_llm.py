@@ -43,7 +43,10 @@ class BaseLLM:
         - decode the outputs with self.tokenizer.decode
 
         """
-        return self.batched_generate([prompt])[0]
+        tokens = self.tokenizer(prompt, return_tensors="pt")
+        N = tokens["input_ids"].shape[1]
+        output = self.model.generate(tokens["input_ids"])
+        return self.tokenizer.decode(output[0, N:])
 
     @overload
     def batched_generate(
@@ -105,7 +108,33 @@ class BaseLLM:
                 for r in self.batched_generate(prompts[idx : idx + micro_batch_size], num_return_sequences, temperature)
             ]
 
-        raise NotImplementedError()
+        # Generate - my code
+        self.tokenizer.padding_side = "left"
+        tokens = self.tokenizer(
+            prompts,
+            return_tensors="pt",
+            padding=True
+        )
+        outputs = self.model.generate(
+            tokens["input_ids"],
+            attention_mask = tokens['attention_mask'],
+            max_new_tokens = 50,
+            do_sample = True if temperature > 0 else False,
+            temperature = temperature,
+            eos_token_id = self.tokenizer.eos_token_id
+        )
+        decoded = self.tokenizer.batch_decode(outputs[:, len(tokens["input_ids"][0]) :])
+        # logic for parsing sequences here
+        if num_return_sequences is None:
+            return decoded
+        outputs = []
+        N = len(decoded) // num_return_sequences
+        i = 0
+        for j in range(N):
+            k = (j+1)*num_return_sequences
+            outputs.append(decoded[i:k])
+            i = k
+        return outputs
 
     def answer(self, *questions) -> list[float]:
         """
