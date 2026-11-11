@@ -44,6 +44,7 @@ class BaseLLM:
 
         """
         tokens = self.tokenizer(prompt, return_tensors="pt")
+        tokens = tokens.to(self.model.device)
         N = tokens["input_ids"].shape[1]
         output = self.model.generate(tokens["input_ids"])
         return self.tokenizer.decode(output[0, N:])
@@ -115,6 +116,7 @@ class BaseLLM:
             return_tensors="pt",
             padding=True
         )
+        tokens = tokens.to(self.model.device)
         outputs = self.model.generate(
             tokens["input_ids"],
             attention_mask = tokens['attention_mask'],
