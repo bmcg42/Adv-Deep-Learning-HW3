@@ -104,7 +104,7 @@ def train_model(
         output_dir=output_dir,
         logging_dir=output_dir,
         report_to="tensorboard",
-        learning_rate= 0.0003,
+        learning_rate= 0.00075,
         num_train_epochs=5,
         per_device_train_batch_size=32,
         gradient_checkpointing=True,
