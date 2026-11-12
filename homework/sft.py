@@ -1,5 +1,7 @@
 from .base_llm import BaseLLM
 from .data import Dataset, benchmark
+from peft import LoraConfig, get_peft_model
+from transformers import TrainingArguments, Trainer
 
 
 def load() -> BaseLLM:
@@ -49,7 +51,10 @@ def format_example(prompt: str, answer: str) -> dict[str, str]:
     """
     Construct a question / answer pair. Consider rounding the answer to make it easier for the LLM.
     """
-    raise NotImplementedError()
+    return {
+      'question':prompt,
+      'answer':f"<answer>{answer}</answer>"
+    }
 
 
 class TokenizedDataset:
@@ -78,7 +83,45 @@ def train_model(
     output_dir: str,
     **kwargs,
 ):
-    raise NotImplementedError()
+    # My - Code
+    # Load model
+    model = load()
+
+    # Config adapters
+    rank = 4
+    config = LoraConfig(
+        target_modules="all-linear",
+        bias="none",
+        task_type="CAUSAL_LM",
+        r = rank,
+        lora_alpha = rank * 4
+    )
+    # Add adapters to model
+    model = get_peft_model(model, config)
+    # Set training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir,
+        logging_dir=output_dir,
+        report_to="tensorboard",
+        learning_rate= 0.0001,
+        num_train_epochs=5,
+        per_device_train_batch_size=32,
+        gradient_checkpointing=True,
+    )
+    # Get training data
+    train_tokens = TokenizedDataset(
+        tokenizer = BaseLLM.tokenizer,
+        data = Dataset('train')
+    )
+    # Train adapters
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+    )
+
+    trainer.train()
+    #raise NotImplementedError()
     test_model(output_dir)
 
 
