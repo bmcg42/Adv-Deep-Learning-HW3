@@ -109,18 +109,21 @@ def train_model(
         gradient_checkpointing=True,
     )
     # Get training data
+    train_data = Dataset("train")
     train_tokens = TokenizedDataset(
-        tokenizer = BaseLLM.tokenizer,
-        data = Dataset('train')
+        tokenizer=model.tokenizer,
+        data=train_data,
+        format_fn=format_example
     )
     # Train adapters
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset,
+        train_dataset=train_tokens,
     )
 
     trainer.train()
+    trainer.save(output_dir)
     #raise NotImplementedError()
     test_model(output_dir)
 
