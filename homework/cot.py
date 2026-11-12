@@ -10,15 +10,26 @@ class CoTModel(BaseLLM):
         chat_template = [
             {
                 "role": "system",
-                "content": "You are a helpful assistant who solves problems step by step. Be concise and clearly state your final answer."
+                "content": 
+                    "You are a unit conversion assistant. "
+                    "Convert the given quantity from its original unit to the requested unit. "
+                    "Return the steps in your reasoning, the equation, and then reformat the result "
+                    "by placing only the numeric value inside the <answer></answer> tags. "
+                    "The answer is incorrect if not finally reported inside the <answer></answer> tags"                
             },
             {
                 "role": "user",
-                "content": "What is 15 feet in inches?"
+                "content": "What is the equivalent of 144 inches in feet?"
             },
             {
                 "role": "assistant",
-                "content": "180.0"
+                "content": """
+                    "1. Original Units: inches "
+                    "2. Target Units: Feet "
+                    "3. Conversion factor: 1/12 feet per inch "
+                    "4. Equation: 144 inches * 1/12 feet per inch = 12 feet "
+                    "5. Answer: <answer>12</answer> "
+                """
             },
             {'role':'user','content':question}
         ]

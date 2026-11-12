@@ -144,8 +144,10 @@ class BaseLLM:
         Answer questions given as individual string arguments.
         """
         # Convert each question
+        print("Questions:",questions)
         prompts = [self.format_prompt(q) for q in questions]
         generations = self.batched_generate(prompts)
+        print("Responses:",generations)
         return [self.parse_answer(g) for g in generations]
 
 
