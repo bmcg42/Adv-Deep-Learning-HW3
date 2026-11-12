@@ -85,8 +85,8 @@ def train_model(
 ):
     # My - Code
     # Load model
-    model = load()
-
+    llm = BaseLLM()
+    model = llm.model
     # Config adapters
     rank = 4
     config = LoraConfig(
@@ -111,7 +111,7 @@ def train_model(
     # Get training data
     train_data = Dataset("train")
     train_tokens = TokenizedDataset(
-        tokenizer=model.tokenizer,
+        tokenizer=llm.tokenizer,
         data=train_data,
         format_fn=format_example
     )
