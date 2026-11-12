@@ -114,7 +114,7 @@ class BaseLLM:
         )
         tokens = tokens.to(self.model.device)
         generation_args = {
-            "max_new_tokens": 128,
+            "max_new_tokens": 64,
             "do_sample": temperature > 0,
             "eos_token_id": self.tokenizer.eos_token_id,
         }
