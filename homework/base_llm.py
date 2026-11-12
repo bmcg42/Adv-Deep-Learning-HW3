@@ -139,14 +139,30 @@ class BaseLLM:
             i = k
         return outputs
 
-    def answer(self, *questions) -> list[float]:
+    def answer(
+        self, *questions, num_return_sequences: int | None = None, temperature: float = 0
+    ) -> list[float] | list[list[float]]:
         """
         Answer questions given as individual string arguments.
         """
-        # Convert each question
         prompts = [self.format_prompt(q) for q in questions]
-        generations = self.batched_generate(prompts)
-        return [self.parse_answer(g) for g in generations]
+        generations = self.batched_generate(
+            prompts,
+            num_return_sequences=num_return_sequences,
+            temperature = temperature
+        )
+
+        answers = [self.parse_answer(g) for g in generations]
+        # Preserve original behavior: one answer per question
+        if num_return_sequences is None:
+            return answers
+        # Group multiple answers by their original question
+        n = num_return_sequences
+        return [
+            answers[i:i + n]
+            for i in range(0, len(answers), n)
+        ]
+
 
 
 def test_model():
