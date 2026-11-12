@@ -114,7 +114,7 @@ class BaseLLM:
         )
         tokens = tokens.to(self.model.device)
         generation_args = {
-            "max_new_tokens": 50,
+            "max_new_tokens": 128,
             "do_sample": temperature > 0,
             "eos_token_id": self.tokenizer.eos_token_id,
         }
@@ -144,10 +144,8 @@ class BaseLLM:
         Answer questions given as individual string arguments.
         """
         # Convert each question
-        print("Questions:",questions)
         prompts = [self.format_prompt(q) for q in questions]
         generations = self.batched_generate(prompts)
-        print("Responses:",generations)
         return [self.parse_answer(g) for g in generations]
 
 

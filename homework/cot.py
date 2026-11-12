@@ -13,9 +13,11 @@ class CoTModel(BaseLLM):
                 "content": 
                     "You are a unit conversion assistant. "
                     "Convert the given quantity from its original unit to the requested unit. "
-                    "Return the steps in your reasoning, the equation, and then reformat the result "
-                    "by placing only the numeric value inside the <answer></answer> tags. "
-                    "The answer is incorrect if not finally reported inside the <answer></answer> tags"                
+                    "Every response must have five steps. The original units, the target units, "
+                    "the conversion factor, the conversion calculation, and the numeric answer "
+                    "placed inside <answer></answer> tags. "
+                    "The answer is incorrect if not reported inside the <answer></answer> tags "
+                    "without units in step 5."                
             },
             {
                 "role": "user",
@@ -23,13 +25,40 @@ class CoTModel(BaseLLM):
             },
             {
                 "role": "assistant",
-                "content": """
-                    "1. Original Units: inches "
-                    "2. Target Units: Feet "
-                    "3. Conversion factor: 1/12 feet per inch "
-                    "4. Equation: 144 inches * 1/12 feet per inch = 12 feet "
+                "content":
+                    "1. Original Units: Inches \n"
+                    "2. Target Units: Feet \n"
+                    "3. Conversion Factor: 12 inches per foot \n"
+                    "4. Calculation: 144 inches / 12 inches per foot = 12 feet \n"
                     "5. Answer: <answer>12</answer> "
-                """
+            },
+            {
+                "role": "user",
+                "content": "Convert 10 hours to seconds."
+            },
+            {
+                "role": "assistant",
+                "content": (
+                    "1. Original Units: Hours\n"
+                    "2. Target Units: Seconds\n"
+                    "3. Conversion Factor: 3600 seconds per hour\n"
+                    "4. Calculation: 10 * 3600 = 36000\n"
+                    "5. Answer: <answer>36000</answer>"
+                )
+            },
+            {
+                "role": "user",
+                "content": "Convert 10 hours to seconds."
+            },
+            {
+                "role": "assistant",
+                "content": (
+                    "1. Original Units: Hours\n"
+                    "2. Target Units: Seconds\n"
+                    "3. Conversion Factor: 3600 seconds per hour\n"
+                    "4. Calculation: 10 * 3600 = 36000\n"
+                    "5. Answer: <answer>36000</answer>"
+                )
             },
             {'role':'user','content':question}
         ]
