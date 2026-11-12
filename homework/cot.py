@@ -7,8 +7,34 @@ class CoTModel(BaseLLM):
         Take a question and convert it into a chat template. The LLM will likely answer much
         better if you provide a chat template. self.tokenizer.apply_chat_template can help here
         """
+        chat_template = [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant who solves problems step by step. Be concise and clearly state your final answer."
+            },
+            {
+                "role": "user",
+                "content": "Sally is given a bag of marbles with 4 red, 4 blue, and 8 yellow marbles. What is the probability that Sally draws a yellow marble?"
+            },
+            {
+                "role": "assistant",
+                "content": """
+                    There are 4 + 4 + 8 = 16 total marbles.
 
-        raise NotImplementedError()
+                    The probability of drawing a yellow marble is:
+                    8 / 16 = 1 / 2 = 50%
+
+                    Answer: 50%
+                """
+            },
+            {'role':'user','content':question}
+        ]
+
+        return self.tokenizer.apply_chat_template(
+            chat_template,
+            add_generation_prompt=True,
+            tokenize=False
+        )
 
 
 def load() -> CoTModel:
