@@ -104,10 +104,11 @@ def train_model(
         output_dir=output_dir,
         logging_dir=output_dir,
         report_to="tensorboard",
-        learning_rate= 0.0001,
+        learning_rate= 0.0003,
         num_train_epochs=5,
         per_device_train_batch_size=32,
         gradient_checkpointing=True,
+        logging_strategy="epoch",
     )
     # Get training data
     train_data = Dataset("train")

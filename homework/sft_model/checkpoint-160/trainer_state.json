@@ -8,7 +8,36 @@
   "is_hyper_param_search": false,
   "is_local_process_zero": true,
   "is_world_process_zero": true,
-  "log_history": [],
+  "log_history": [
+    {
+      "epoch": 1.0,
+      "grad_norm": 1.1867982149124146,
+      "learning_rate": 0.00024187499999999998,
+      "loss": 1.1147,
+      "step": 32
+    },
+    {
+      "epoch": 2.0,
+      "grad_norm": 1.2732150554656982,
+      "learning_rate": 0.00018187499999999996,
+      "loss": 0.6351,
+      "step": 64
+    },
+    {
+      "epoch": 3.0,
+      "grad_norm": 1.4792321920394897,
+      "learning_rate": 0.000121875,
+      "loss": 0.508,
+      "step": 96
+    },
+    {
+      "epoch": 4.0,
+      "grad_norm": 1.4940454959869385,
+      "learning_rate": 6.187499999999999e-05,
+      "loss": 0.4273,
+      "step": 128
+    }
+  ],
   "logging_steps": 500,
   "max_steps": 160,
   "num_input_tokens_seen": 0,
