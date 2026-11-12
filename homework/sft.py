@@ -98,6 +98,7 @@ def train_model(
     )
     # Add adapters to model
     model = get_peft_model(model, config)
+    model.enable_input_require_grads() # avoid error
     # Set training arguments
     training_args = TrainingArguments(
         output_dir=output_dir,
@@ -123,7 +124,7 @@ def train_model(
     )
 
     trainer.train()
-    trainer.save(output_dir)
+    trainer.save_model(output_dir)
     #raise NotImplementedError()
     test_model(output_dir)
 
