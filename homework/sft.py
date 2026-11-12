@@ -88,7 +88,7 @@ def train_model(
     llm = BaseLLM()
     model = llm.model
     # Config adapters
-    rank = 4
+    rank = 8
     config = LoraConfig(
         target_modules="all-linear",
         bias="none",
