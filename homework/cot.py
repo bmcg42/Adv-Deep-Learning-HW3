@@ -14,18 +14,11 @@ class CoTModel(BaseLLM):
             },
             {
                 "role": "user",
-                "content": "Sally is given a bag of marbles with 4 red, 4 blue, and 8 yellow marbles. What is the probability that Sally draws a yellow marble?"
+                "content": "What is 15 feet in inches?"
             },
             {
                 "role": "assistant",
-                "content": """
-                    There are 4 + 4 + 8 = 16 total marbles.
-
-                    The probability of drawing a yellow marble is:
-                    8 / 16 = 1 / 2 = 50%
-
-                    Answer: 50%
-                """
+                "content": "180.0"
             },
             {'role':'user','content':question}
         ]

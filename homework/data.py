@@ -60,4 +60,4 @@ def benchmark(func: BaseLLM, dataset: Dataset, max_question: int) -> BenchmarkRe
 
 
 if __name__ == "__main__":
-    print(Dataset("train")[0])
+    print(Dataset("train")[:20])
