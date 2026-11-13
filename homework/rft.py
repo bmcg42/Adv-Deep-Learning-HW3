@@ -47,13 +47,10 @@ def tokenize(tokenizer, question: str, answer: str):
     return full
 
 
-def format_example(prompt: str, answer: str) -> dict[str, str]:
-    """
-    Construct a question / answer pair. Consider rounding the answer to make it easier for the LLM.
-    """
+def format_example(question, answer, reasoning):
     return {
-      'question':prompt,
-      'answer':f"<answer>{answer}</answer>"
+        "question": question,
+        "answer": reasoning
     }
 
 
