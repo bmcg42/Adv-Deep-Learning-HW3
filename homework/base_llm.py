@@ -95,7 +95,7 @@ class BaseLLM:
         # Preventing OOM
         # Depending on your GPU batched generation will use a lot of memory.
         # If you run out of memory, try to reduce the micro_batch_size.
-        micro_batch_size = 32
+        micro_batch_size = 8
         if len(prompts) > micro_batch_size:
             return [
                 r
@@ -118,9 +118,12 @@ class BaseLLM:
             "do_sample": temperature > 0,
             "eos_token_id": self.tokenizer.eos_token_id,
         }
-
+        # Conditional args
+        if num_return_sequences is not None:
+            generation_args["num_return_sequences"] = num_return_sequences
         if temperature > 0:
             generation_args["temperature"] = temperature
+        # Generate
         outputs = self.model.generate(
             tokens["input_ids"],
             attention_mask = tokens['attention_mask'],

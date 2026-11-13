@@ -10,21 +10,24 @@ def generate_dataset(output_json: str, oversample: int = 10, temperature: float 
     answers = [train_data[i][1] for i in range(len(train_data))]
 
     # Generate multiple answers per question
-    grouped_answers = model.answer(
-        *questions,
+    grouped_answers = model.batched_generate(
+        [model.format_prompt(q) for q in questions],
         num_return_sequences=oversample,
-        temperature = temperature
+        temperature=temperature
     )
 
     # Rejection sampling
     good_examples = []
+
     for i in range(len(questions)):
         pred_answers = grouped_answers[i]
+
         correct = next(
             (gen for gen in pred_answers
-             if is_answer_valid(gen, answers[i])),
+            if is_answer_valid(model.parse_answer(gen), answers[i])),
             None
         )
+
         if correct is not None:
             good_examples.append([questions[i], answers[i], correct])
 
