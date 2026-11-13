@@ -2,7 +2,7 @@ from .cot import CoTModel
 from .data import Dataset, is_answer_valid
 
 
-def generate_dataset(output_json: str, oversample: int = 10, temperature: float = 0.6):
+def generate_dataset(output_json: str, oversample: int = 20, temperature: float = 0.6):
     import json
     model = CoTModel()
     train_data = Dataset('train')
