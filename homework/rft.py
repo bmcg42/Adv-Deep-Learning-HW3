@@ -1,5 +1,8 @@
 from .base_llm import BaseLLM
 from .sft import test_model
+from peft import LoraConfig, get_peft_model
+from transformers import TrainingArguments, Trainer
+from .data import Dataset
 
 
 def load() -> BaseLLM:
@@ -16,13 +19,115 @@ def load() -> BaseLLM:
 
     return llm
 
+def tokenize(tokenizer, question: str, answer: str):
+    """
+    Tokenize a data element.
+    We first append the <EOS> token to the question / answer pair.
+    Then we tokenize and construct the ground truth `labels`.
+    `labels[i] == -100` for the question or masked out parts, since we only want to supervise
+    the answer.
+    """
+    full_text = f"{question} {answer}{tokenizer.eos_token}"
+
+    tokenizer.padding_side = "right"
+    tokenizer.pad_token = tokenizer.eos_token
+    full = tokenizer(full_text, padding="max_length", truncation=True, max_length=128)
+
+    input_ids = full["input_ids"]
+    question_len = len(tokenizer(question)["input_ids"])
+
+    # Create labels: mask out the prompt part
+    labels = [-100] * question_len + input_ids[question_len:]
+
+    for i in range(len(labels)):
+        if full["attention_mask"][i] == 0:
+            labels[i] = -100
+
+    full["labels"] = labels
+    return full
+
+
+def format_example(prompt: str, answer: str) -> dict[str, str]:
+    """
+    Construct a question / answer pair. Consider rounding the answer to make it easier for the LLM.
+    """
+    return {
+      'question':prompt,
+      'answer':f"<answer>{answer}</answer>"
+    }
+
+
+class TokenizedDataset:
+    def __init__(self, tokenizer, data: Dataset, format_fn):
+        """
+        Use the
+        - BaseLLM.tokenizer
+        - Dataset
+        - format_fn which converts a data element into a dict with entries
+          - question: str
+          - answer: str
+        """
+        self.format_fn = format_fn
+        self.tokenizer = tokenizer
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        formated_data = self.format_fn(*self.data[idx])
+        return tokenize(self.tokenizer, **formated_data)
 
 def train_model(
     output_dir: str,
     **kwargs,
 ):
-    # Reuse much of the SFT code here
-    raise NotImplementedError()
+    # My - Code
+    # Load model
+    llm = BaseLLM()
+    model = llm.model
+    # Config adapters
+    rank = 8
+    config = LoraConfig(
+        target_modules="all-linear",
+        bias="none",
+        task_type="CAUSAL_LM",
+        r = rank,
+        lora_alpha = rank * 4
+    )
+    # Add adapters to model
+    model = get_peft_model(model, config)
+    model.enable_input_require_grads() # avoid error
+    # Set training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir,
+        logging_dir=output_dir,
+        report_to="tensorboard",
+        learning_rate= 0.00075,
+        num_train_epochs=5,
+        per_device_train_batch_size=32,
+        gradient_checkpointing=True,
+        logging_strategy="epoch",
+    )
+    # Get training data
+    train_data = Dataset("rft")
+    train_tokens = TokenizedDataset(
+        tokenizer=llm.tokenizer,
+        data=train_data,
+        format_fn=format_example
+    )
+    # Train adapters
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_tokens,
+    )
+
+    trainer.train()
+    trainer.save_model(output_dir)
+    #raise NotImplementedError()
+    test_model(output_dir)
+
 
 
 if __name__ == "__main__":
